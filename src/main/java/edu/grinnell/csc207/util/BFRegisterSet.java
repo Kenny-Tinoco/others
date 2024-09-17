@@ -19,9 +19,10 @@ public class BFRegisterSet {
      */
     public void store(char register, BigFraction val) {
         if (register < 'a' || register > 'z') {
-            System.err.println("Error: Register out of bounds. Use letters 'a' through 'z'.");
+            System.err.println("*** ERROR [STORE command received invalid register] ***");
+            return;
         }
-        
+
         int index = register - 'a';
         registers[index] = val;
     }
@@ -33,12 +34,10 @@ public class BFRegisterSet {
      */
     public BigFraction get(char register) {
         if (register < 'a' || register > 'z') {
-            System.err.println("Error: Register out of bounds. Use letters 'a' through 'z'.");
+            return new BigFraction(BigInteger.ZERO, BigInteger.ONE); // Default return value
         }
-        
+
         int index = register - 'a';
-        BigFraction value = registers[index];
-        
-        return value != null ? value : new BigFraction(BigInteger.ZERO, BigInteger.ONE); // Default return value
+        return registers[index];
     }
 }

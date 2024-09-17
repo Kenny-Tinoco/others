@@ -3,6 +3,7 @@ package edu.grinnell.csc207.main;
 import edu.grinnell.csc207.util.BigFraction;
 import edu.grinnell.csc207.util.BFCalculator;
 
+import java.util.Objects;
 import java.util.Scanner;
 import java.io.PrintWriter;
 
@@ -90,7 +91,9 @@ public class InteractiveCalculator {
     String[] parts = line.split(" ");
     if (parts.length == 2) {
         calculator.store(parts[1].charAt(0));
-        pen.println("STORED");
+        if(!Objects.equals(calculator.getRegister(parts[1].charAt(0)).toString(), "0")){
+            pen.println("STORED");
+        }
     } else {
         pen.println("Invalid STORE command.");
     }
