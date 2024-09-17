@@ -36,9 +36,16 @@ public class InteractiveCalculator {
       }
       
       try{
-        compute(line.split(" "));
+          String[] values = line.split(" ");
+
+          if(values.length % 2 == 0) {
+              pen.println("*** ERROR [Invalid expression] ***");
+              continue;
+          }
+          compute(values);
       } catch (Exception e){
-        pen.println("Invalid expression.");
+          pen.println("*** ERROR [Invalid expression] ***");
+        continue;
       }
       
       pen.println(calculator.get());     
@@ -83,6 +90,7 @@ public class InteractiveCalculator {
     String[] parts = line.split(" ");
     if (parts.length == 2) {
         calculator.store(parts[1].charAt(0));
+        pen.println("STORED");
     } else {
         pen.println("Invalid STORE command.");
     }
@@ -90,8 +98,9 @@ public class InteractiveCalculator {
   
   private static void compute(String[] tokens)
   {
+    calculator.clear();
+
     String operator = null;
- 
     for (String token : tokens) {
         if (isOperator(token)) {
             operator = token;
@@ -100,6 +109,7 @@ public class InteractiveCalculator {
                 calculator.setByRegister(token.charAt(0));
             } else {
                 applyOperation(calculator.getRegister(token.charAt(0)), operator);
+                operator = null;
             }
         } else {
             if (operator == null) {
@@ -107,6 +117,7 @@ public class InteractiveCalculator {
                 calculator.add(getFractionByString(token));
             } else {
                 applyOperation(getFractionByString(token), operator);
+                operator = null;
             }
         }
     }
