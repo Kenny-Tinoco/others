@@ -9,122 +9,132 @@ import java.io.PrintWriter;
 
 public class InteractiveCalculator {
 
-  private static BFCalculator calculator;
-  private static PrintWriter pen;
+    public static void main(String[] args) {
+        InteractiveCalculator ic = new InteractiveCalculator();
+        Scanner scanner = new Scanner(System.in);
 
-  public static void main(String[] args) {
-    calculator = new BFCalculator();
-    pen = new PrintWriter(System.out, true);
-    Scanner scanner = new Scanner(System.in);
-    
-    pen.println("Welcome to Interactive Calculator. Type QUIT to exit.");
+        ic.println("Welcome to Interactive Calculator. Type QUIT to exit.");
+        while (true) {
+            ic.initPen();
+            String line = scanner.nextLine();
 
-    while (true) {
-      pen.print("> ");
-      pen.flush();
+            if (line.equalsIgnoreCase("QUIT")) {
+                ic.println("Exiting calculator.");
+                scanner.close();
+                return;
+            }
 
-      String line = scanner.nextLine();
+            if (line.startsWith("STORE") || line.startsWith("store")) {
+                ic.storeValue(line);
+                continue;
+            }
 
-      if (line.equalsIgnoreCase("QUIT")) {
-        pen.println("Exiting calculator.");
-        scanner.close();
-        return;
-      }
+            String[] values = line.split(" ");
+            boolean isSuccessful = ic.compute(values);
+            if(!isSuccessful){
+                ic.println("*** ERROR [Invalid expression] ***");
+                continue;
+            }
 
-      if (line.startsWith("STORE") || line.startsWith("store")) {
-        storeValue(line);
-        continue;
-      }
-      
-      try{
-          String[] values = line.split(" ");
-
-          if(values.length % 2 == 0) {
-              pen.println("*** ERROR [Invalid expression] ***");
-              continue;
-          }
-          compute(values);
-      } catch (Exception e){
-          pen.println("*** ERROR [Invalid expression] ***");
-        continue;
-      }
-      
-      pen.println(calculator.get());     
+            ic.println(""+ic.calculator.get());
+        }
     }
-  }
 
-  private static boolean isOperator(String token) {
-    return token.equals("+") || token.equals("-") || token.equals("*") || token.equals("/");
-  }
+    public BFCalculator calculator;
+    private PrintWriter pen;
 
-  private static boolean isRegister(String token) {
-    return token.length() == 1 && Character.isLetter(token.charAt(0));
-  }
-
-  private static void applyOperation(BigFraction right, String operator) {
-    switch (operator) {
-      case "+":
-        calculator.add(right);
-        break;
-      case "-":
-        calculator.subtract(right);
-        break;
-      case "*":
-        calculator.multiply(right);
-        break;
-      case "/":
-        calculator.divide(right);
-        break;
-      default:
-        pen.println("Unknown operator: (" + operator+")");
+    public InteractiveCalculator() {
+        calculator = new BFCalculator();
+        pen = new PrintWriter(System.out, true);
     }
-  }
 
-  private static BigFraction getFractionByString(String value){
-      String[] values = value.split("/");
-      return (values.length == 1) ?
-              new BigFraction(Integer.parseInt(values[0]), 1) : new BigFraction(value);
-  }
-  
-  private static void storeValue(String line)
-  {
-    String[] parts = line.split(" ");
-    if (parts.length == 2) {
+    public void println(String str){
+        pen.println(str);
+    }
+
+    public void initPen(){
+        pen.print("> ");
+        pen.flush();
+    }
+
+    public void storeValue(String line) {
+        String[] parts = line.split(" ");
+
+        if(parts.length != 2 || !isRegister(parts[1])){
+            pen.println("Invalid STORE command.");
+            return;
+        } else if (parts[1].charAt(0) < 'a' || parts[1].charAt(0) > 'z') {
+            pen.println("*** ERROR [STORE command received invalid register] ***");
+            return;
+        }
+
         calculator.store(parts[1].charAt(0));
-        if(!Objects.equals(calculator.getRegister(parts[1].charAt(0)).toString(), "0")){
-            pen.println("STORED");
-        }
-    } else {
-        pen.println("Invalid STORE command.");
+        System.err.println("STORED");
     }
-  }
-  
-  private static void compute(String[] tokens)
-  {
-    calculator.clear();
 
-    String operator = null;
-    for (String token : tokens) {
-        if (isOperator(token)) {
-            operator = token;
-        } else if (isRegister(token)) {
-           if (operator == null) {
-                calculator.setByRegister(token.charAt(0));
+    public boolean compute(String[] tokens) {
+        if(tokens.length % 2 == 0) {//### Una cantidad par de argumentos no puede ser valida
+            return false;
+        }
+
+        calculator.clear();
+
+        String operator = null;
+        BigFraction secondOperando = null;
+
+        for (String token : tokens) {
+            BigFraction value = null;
+            if (isOperator(token)) {
+                operator = token;
+            } else if (!isRegister(token)) {//############################ si no es un registro
+                value = new BigFraction(token);
             } else {
-                applyOperation(calculator.getRegister(token.charAt(0)), operator);
-                operator = null;
+                value = calculator.getRegister(token.charAt(0));
+                if(value == null || value.toString() == "0") {
+                    return false; //############################ Si no existe el registro o es cero
+                }
             }
-        } else {
+
             if (operator == null) {
-                calculator.clear();
-                calculator.add(getFractionByString(token));
+                calculator.add(value);// Se inicializ el primer operando, luego este if no se ejecuta nunca más
             } else {
-                applyOperation(getFractionByString(token), operator);
-                operator = null;
+                secondOperando = value;
+            }
+
+            if(secondOperando != null) {
+                if(operator == null) {
+                    return false;//############################ Si no hay operador
+                }
+                applyOperation(secondOperando, operator);
             }
         }
-    }
-  }  
-}
 
-/// Me tiene de un bate
+        return true;
+    }
+
+    private boolean isOperator(String token) {
+        return token.equals("+") || token.equals("-") || token.equals("*") || token.equals("/");
+    }
+
+    public boolean isRegister(String token) {
+        return token.length() == 1 && Character.isLetter(token.charAt(0));
+    }
+
+    ////////////////// si el operador es null no se hace ninguna operación
+    private void applyOperation(BigFraction right, String operator) {
+        switch (operator) {
+            case "+":
+                calculator.add(right);
+                break;
+            case "-":
+                calculator.subtract(right);
+                break;
+            case "*":
+                calculator.multiply(right);
+                break;
+            case "/":
+                calculator.divide(right);
+                break;
+        }
+    }
+}

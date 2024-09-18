@@ -10,7 +10,7 @@ public class BFCalculator {
     private BFRegisterSet register;
 
     public BFCalculator(){
-       register = new BFRegisterSet();
+        register = new BFRegisterSet();
        clear();
     }
 
@@ -58,6 +58,7 @@ public class BFCalculator {
 
     public void store(char id){
        register.store(id, this.lastValue);
+       clear();
     }
 
 }

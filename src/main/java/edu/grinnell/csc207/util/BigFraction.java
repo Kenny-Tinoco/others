@@ -52,7 +52,6 @@ public class BigFraction {
   public BigFraction(String str) {
     //#################################Cambio#################################################
     String[] values = str.split("/");
-
     this.num = new BigInteger(values[0]);
     this.denom = (values.length == 1) ? BigInteger.ONE : new BigInteger(values[1]);
     simplify();
