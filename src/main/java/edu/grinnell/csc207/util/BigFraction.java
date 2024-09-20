@@ -13,10 +13,10 @@ public class BigFraction {
   // +--------+
 
   /** The numerator of the fraction. Can be positive, zero or negative. */
-  BigInteger num;
+  private BigInteger num;
 
   /** The denominator of the fraction. Must be non-negative. */
-  BigInteger denom;
+  private BigInteger denom;
 
   // +--------------+-------------------------------------------------
   // | Constructors |

@@ -58,7 +58,6 @@ public class BFCalculator {
 
     public void store(char id){
        register.store(id, this.lastValue);
-       clear();
     }
 
 }

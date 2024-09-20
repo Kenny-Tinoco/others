@@ -25,6 +25,7 @@ public class QuickCalculator {
             }
 
             if (!command.contains(" ")) {
+                ic.calculator.clear();
                 ic.calculator.add(new BigFraction(command));
                 ic.println(command + " -> " + ic.calculator.get());
                 continue;

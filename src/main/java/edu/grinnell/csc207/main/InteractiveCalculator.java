@@ -29,6 +29,22 @@ public class InteractiveCalculator {
                 continue;
             }
 
+            if (!line.contains(" ")) {
+                BigFraction value = null;
+                if (ic.isRegister(line)) {
+                    value = ic.calculator.getRegister(line.charAt(0));
+                }else{
+                    //ic.calculator.clear();
+                    //ic.calculator.add(new BigFraction(line));
+                    ic.getCalculator().clear();
+                    ic.geCalculator().add(new BigFraction(line));
+                    //value = ic.calculator.get();
+                    value = ic.getCalculator().get();
+                }
+                ic.println(""+value);
+                continue;
+            }
+
             String[] values = line.split(" ");
             boolean isSuccessful = ic.compute(values);
             if(!isSuccessful){
@@ -40,8 +56,18 @@ public class InteractiveCalculator {
         }
     }
 
-    public BFCalculator calculator;
+    //public BFCalculator calculator;
     private PrintWriter pen;
+
+    private BFCalculator calculator;
+    // Método de acceso
+    public BFCalculator getCalculator(){
+        return calculator;
+    }
+
+
+
+
 
     public InteractiveCalculator() {
         calculator = new BFCalculator();
@@ -80,6 +106,7 @@ public class InteractiveCalculator {
         calculator.clear();
 
         String operator = null;
+        BigFraction firstOperando = null;
         BigFraction secondOperando = null;
 
         for (String token : tokens) {
@@ -96,17 +123,22 @@ public class InteractiveCalculator {
             }
 
             if (operator == null) {
-                calculator.add(value);// Se inicializ el primer operando, luego este if no se ejecuta nunca más
+                firstOperando = value;// Se inicializ el primer operando, luego este if no se ejecuta nunca más
+                calculator.add(firstOperando);
             } else {
                 secondOperando = value;
             }
 
             if(secondOperando != null) {
-                if(operator == null) {
+                if(operator == null || firstOperando == null) {
                     return false;//############################ Si no hay operador
                 }
                 applyOperation(secondOperando, operator);
             }
+        }
+
+        if(secondOperando == null){
+            return false;
         }
 
         return true;
